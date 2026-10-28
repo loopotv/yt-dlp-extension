@@ -46,6 +46,24 @@ On Windows, use `.venv\Scripts\pip` and `.venv\Scripts\python` instead.
 
 Keep the server running whenever you want to use the extension.
 
+#### Start automatically at login (macOS)
+
+Instead of starting the server by hand every time, you can let macOS start it in the background at every login:
+
+```bash
+./install-autostart.sh
+```
+
+The script creates the virtualenv if needed and installs a `launchd` agent. The agent starts the server at login and restarts it if it stops. Logs go to `~/Library/Logs/yt-dlp-extension.log`.
+
+If the server is already running in a terminal, stop it first (Ctrl+C). To remove the automatic start:
+
+```bash
+./uninstall-autostart.sh
+```
+
+If you move the project folder, run `./install-autostart.sh` again.
+
 ### 2. Load the extension
 
 1. Open `chrome://extensions/`.
@@ -73,7 +91,7 @@ The server only listens on `127.0.0.1`, so other devices on your network can't r
 
 ## Troubleshooting
 
-- **"impossibile contattare il server locale"**: the server isn't running. Start it with `.venv/bin/python server/server.py`.
+- **"impossibile contattare il server locale"**: the server isn't running. Start it with `.venv/bin/python server/server.py`. If you use automatic start, check `~/Library/Logs/yt-dlp-extension.log`.
 - **`CERTIFICATE_VERIFY_FAILED`**: Python can't find SSL certificates. This is common with the python.org installer on macOS. Make sure `certifi` is installed (it's in `requirements.txt`).
 - **A site that used to work stops working**: sites change often, so update yt-dlp with `.venv/bin/pip install -U yt-dlp`.
 
