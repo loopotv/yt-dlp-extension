@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "YT-DLP Downloader",
+  "version": "1.0",
+  "description": "Scarica video dalla pagina corrente tramite yt-dlp",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:5055/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

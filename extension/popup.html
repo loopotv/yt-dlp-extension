@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: system-ui, sans-serif; width: 300px; padding: 12px; margin: 0; font-size: 13px; }
+    .modes { display: flex; gap: 12px; margin-bottom: 10px; }
+    button { width: 100%; padding: 10px; background: #0d6efd; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    button:disabled { background: #6c757d; cursor: not-allowed; }
+    #status { margin-top: 10px; line-height: 1.4; word-break: break-word; }
+    #status:empty { display: none; }
+    #jobs { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .job { border: 1px solid #dee2e6; border-radius: 6px; padding: 8px; }
+    .job-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .job-info { color: #6c757d; margin-top: 2px; word-break: break-word; }
+    .job.error .job-info { color: #dc3545; }
+    .job.done .job-info { color: #198754; }
+    .bar { height: 4px; background: #e9ecef; border-radius: 2px; margin-top: 6px; overflow: hidden; }
+    .bar div { height: 100%; background: #0d6efd; transition: width .3s; }
+    #clearBtn { display: none; margin-top: 8px; background: none; color: #6c757d; padding: 4px; font-weight: normal; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="modes">
+    <label><input type="radio" name="mode" value="video" checked> Video (mp4)</label>
+    <label><input type="radio" name="mode" value="audio"> Solo audio (mp3)</label>
+  </div>
+  <button id="downloadBtn">Scarica Video Pagina</button>
+  <div id="status"></div>
+  <div id="jobs"></div>
+  <button id="clearBtn">Rimuovi completati</button>
+  <script src="popup.js"></script>
+</body>
+</html>
