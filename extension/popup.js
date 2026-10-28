@@ -10,8 +10,16 @@ const STATUS_LABELS = {
   downloading: 'Download in corso',
   processing: 'Elaborazione con ffmpeg...',
   done: 'Completato nella cartella Downloads',
+  cancelled: 'Annullato',
   error: 'Errore'
 };
+
+const CANCELLABLE = ['starting', 'downloading'];
+const ACTIVE = ['starting', 'downloading', 'processing'];
+
+// Elementi già disegnati, per id: vengono aggiornati invece di essere ricreati,
+// altrimenti il refresh ogni secondo può far perdere il click su "Annulla"
+const jobElements = new Map();
 
 btn.addEventListener('click', async () => {
   btn.disabled = true;
@@ -51,19 +59,51 @@ clearBtn.addEventListener('click', async () => {
   refreshJobs();
 });
 
-function renderJob(job) {
+function createJobElement(job) {
   const el = document.createElement('div');
-  el.className = `job ${job.status}`;
 
+  const header = document.createElement('div');
+  header.className = 'job-header';
   const title = document.createElement('div');
   title.className = 'job-title';
-  title.textContent = (job.mode === 'audio' ? '🎵 ' : '🎬 ') + job.title;
-  title.title = job.title;
+  const cancel = document.createElement('button');
+  cancel.className = 'cancel-btn';
+  cancel.textContent = 'Annulla';
+  cancel.addEventListener('click', async () => {
+    cancel.disabled = true;
+    try {
+      const response = await fetch(`${SERVER}/jobs/${job.id}/cancel`, { method: 'POST' });
+      const result = await response.json();
+      if (!result.success) statusDiv.innerText = 'Errore: ' + result.error;
+    } catch {
+      statusDiv.innerText = 'Errore: impossibile contattare il server locale.';
+    }
+    refreshJobs();
+  });
+  header.append(title, cancel);
 
   const info = document.createElement('div');
   info.className = 'job-info';
+  const bar = document.createElement('div');
+  bar.className = 'bar';
+  bar.append(document.createElement('div'));
+
+  el.append(header, info, bar);
+  el.parts = { title, cancel, info, bar };
+  return el;
+}
+
+function updateJobElement(el, job) {
+  const { title, cancel, info, bar } = el.parts;
+  el.className = `job ${job.status}`;
+
+  title.textContent = (job.mode === 'audio' ? '🎵 ' : '🎬 ') + job.title;
+  title.title = job.title;
+
   let text = STATUS_LABELS[job.status] || job.status;
-  if (job.status === 'downloading') {
+  if (job.cancel_requested && ACTIVE.includes(job.status)) {
+    text = 'Annullamento...';
+  } else if (job.status === 'downloading') {
     if (job.percent != null) text += ` · ${job.percent}%`;
     if (job.speed) text += ` · ${job.speed}`;
     if (job.eta) text += ` · ETA ${job.eta}`;
@@ -71,25 +111,34 @@ function renderJob(job) {
   if (job.status === 'error') text += ': ' + job.error;
   info.textContent = text;
 
-  el.append(title, info);
-
-  if (['starting', 'downloading', 'processing'].includes(job.status)) {
-    const bar = document.createElement('div');
-    bar.className = 'bar';
-    const fill = document.createElement('div');
-    fill.style.width = `${job.percent || 0}%`;
-    bar.append(fill);
-    el.append(bar);
-  }
-  return el;
+  cancel.hidden = !CANCELLABLE.includes(job.status) || job.cancel_requested;
+  bar.hidden = !ACTIVE.includes(job.status);
+  bar.firstChild.style.width = `${job.percent || 0}%`;
 }
 
 async function refreshJobs() {
   try {
     const response = await fetch(`${SERVER}/jobs`);
     const jobs = await response.json();
-    jobsDiv.replaceChildren(...jobs.map(renderJob));
-    clearBtn.style.display = jobs.some(j => ['done', 'error'].includes(j.status)) ? 'block' : 'none';
+
+    const ids = new Set(jobs.map(j => j.id));
+    for (const [id, el] of jobElements) {
+      if (!ids.has(id)) {
+        el.remove();
+        jobElements.delete(id);
+      }
+    }
+    jobs.forEach(job => {
+      let el = jobElements.get(job.id);
+      if (!el) {
+        el = createJobElement(job);
+        jobElements.set(job.id, el);
+      }
+      updateJobElement(el, job);
+      jobsDiv.append(el); // append su un elemento esistente lo sposta: mantiene l'ordine
+    });
+
+    clearBtn.style.display = jobs.some(j => !ACTIVE.includes(j.status)) ? 'block' : 'none';
   } catch {
     // server non raggiungibile: lo segnala il click sul pulsante
   }

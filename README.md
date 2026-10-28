@@ -17,6 +17,7 @@ Chrome popup ──POST /download──▶ local server (127.0.0.1:5055) ──�
 - Downloads the best video quality as **mp4**, or **audio only as mp3**
 - Downloads run in the background on the server, so you can close the popup and reopen it later to check progress
 - Shows progress, speed and ETA for each download
+- Lets you cancel a download while it's in progress, and removes its partial files. Once the ffmpeg merge or conversion has started, a download can no longer be cancelled.
 - If you click again on a video that is already downloading, it doesn't start a second copy
 - Works on any site yt-dlp supports ([list of supported sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md))
 

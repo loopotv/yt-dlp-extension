@@ -11,7 +11,12 @@
     #status:empty { display: none; }
     #jobs { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
     .job { border: 1px solid #dee2e6; border-radius: 6px; padding: 8px; }
-    .job-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .job-header { display: flex; align-items: center; gap: 8px; }
+    .job-title { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cancel-btn { width: auto; padding: 2px 8px; background: none; color: #dc3545; border: 1px solid #dc3545; font-weight: normal; font-size: 12px; }
+    .cancel-btn:hover { background: #dc3545; color: white; }
+    .job.cancelled .job-info { color: #6c757d; font-style: italic; }
+    [hidden] { display: none !important; }
     .job-info { color: #6c757d; margin-top: 2px; word-break: break-word; }
     .job.error .job-info { color: #dc3545; }
     .job.done .job-info { color: #198754; }
